@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { hashPass } from "../Utils/PasswordHash.js";
 
 export const createUser = async(req,res) => {
     const {name,email,password,username,age,usertype} = req.body;
@@ -18,13 +19,15 @@ export const createUser = async(req,res) => {
                 return res.status(400).json({message : 'that username is already exist'})
             }
         }
+
+        //hasing password
+        const hashed = await hashPass(password)
         
         //inserting user
         const sql = 'INSERT INTO users (name,email,password,username,age,usertype) VALUES (?,?,?,?,?,?);'
-        const value = [name,email,password,username,age,usertype];
+        const value = [name,email,hashed,username,age,usertype];
 
         const [result] = await pool.query(sql,value)
-        console.log(result);
 
         res.status(201).json({message : 'new user is a created', userId : result.insertId})
     }catch(error){
@@ -71,7 +74,7 @@ export const updateUser = async(req,res) => {
         const updateQuery = 'UPDATE users SET name = ?,username = ?,age = ? WHERE id = ?';
         const value = [name || findUser[0].name,username || findUser[0].username, age|| findUser[0].age,id]
         console.log(value)
-        
+
         const [updateUser] = await pool.query(updateQuery,value)
         if(updateUser.affectedRows === 0){
             return res.status(400).json({message : 'sorry user not updated'})
