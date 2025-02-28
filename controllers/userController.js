@@ -73,7 +73,6 @@ export const updateUser = async(req,res) => {
 
         const updateQuery = 'UPDATE users SET name = ?,username = ?,age = ? WHERE id = ?';
         const value = [name || findUser[0].name,username || findUser[0].username, age|| findUser[0].age,id]
-        console.log(value)
 
         const [updateUser] = await pool.query(updateQuery,value)
         if(updateUser.affectedRows === 0){
